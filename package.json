@@ -1,0 +1,43 @@
+{
+  "name": "@local/dsh-console-tap-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DSH 控制台显形:采集助手执行的命令与完整控制台输出,实时推给官方 WebUI(悬浮控制台)",
+  "type": "module",
+  "main": "./lib/host.js",
+  "exports": {
+    ".": "./lib/host.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "console",
+    "terminal"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akvi0921/dsh-console-tap.git"
+  },
+  "scripts": {
+    "test": "node test/client-logic.test.mjs"
+  },
+  "files": [
+    "lib",
+    "docs",
+    "install.sh",
+    "uninstall.sh"
+  ]
+}
