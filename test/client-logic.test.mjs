@@ -72,3 +72,24 @@ check('保留的是最新的行', s3.get('c9').screens.stdout.lines.join('\n').i
 
 console.log('\n结果: PASS=' + pass + ' FAIL=' + fail);
 process.exit(fail > 0 ? 1 : 0);
+
+console.log('== rich 控制台重绘(光标移动 + ESC[0K,不是 CR) ==');
+{
+  // 与 Gradle rich 同形状:上移 -> 回列 -> 擦除本行 -> 写新文本 -> 下移
+  const screen = mod.createScreen();
+  const redraw = (pct, secs) => `\u001b[2A\u001b[0K\u001b[1m<=====> ${pct}% EXECUTING [${secs}s]\u001b[m\u001b[37D\u001b[2B`;
+  mod.writeScreen(screen, '> Task :a\n> Task :b\n');
+  for (let i = 1; i <= 30; i++) mod.writeScreen(screen, redraw(i * 3, i));
+  const worst = Math.max(...screen.lines.map((l) => l.length));
+  const execLines = screen.lines.filter((l) => l.includes('EXECUTING')).length;
+  check('没有把重绘串成一行(最长行 <= 200)', worst <= 200, `最长行=${worst}`);
+  check('进度行没有累积(<= 2 行)', execLines <= 2, `EXECUTING 行数=${execLines}`);
+  check('任务行保留', screen.lines.some((l) => l.includes(':a')), screen.lines.slice(0, 3).join(' / '));
+  check('画面无残留转义字符', screen.lines.every((l) => !l.includes('\u001b')));
+  // 跨帧半个序列:把一条重绘序列切成两半喂进去,不能错乱
+  const s2 = mod.createScreen();
+  mod.writeScreen(s2, 'X\n');
+  mod.writeScreen(s2, '\u001b[1A\u001b[0K');
+  mod.writeScreen(s2, 'Y');
+  check('跨帧半个序列不错乱', s2.lines.filter((l) => l.trim() !== '').join('|') === 'Y', JSON.stringify(s2.lines));
+}
