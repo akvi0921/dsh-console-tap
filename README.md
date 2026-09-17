@@ -15,21 +15,32 @@
 
 ## 一键安装
 
+**推荐(自动镜像回退,国内网络最稳)** —— 复制粘贴这一整行:
+
+```bash
+bash -c 'f=$(mktemp); p=/akvi0921/dsh-console-tap/main/install.sh; for b in https://ghfast.top/https://raw.githubusercontent.com https://gh-proxy.com/https://raw.githubusercontent.com https://raw.githubusercontent.com; do curl -fsSL -m 60 "$b$p" -o "$f" && exec bash "$f"; done; echo "下载失败:请改用 git clone https://github.com/akvi0921/dsh-console-tap 后执行 bash install.sh"'
+```
+
+直连 GitHub 可用时,也可以只用一条:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/install.sh | bash
 ```
 
-国内网络直连 raw 不稳时,用镜像:
+国内网络直连 raw 不稳时,换镜像前缀:
 
 ```bash
 curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/install.sh | bash
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/install.sh | bash
 ```
 
 先看它要做什么(不落任何改动):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/install.sh | bash -s -- --dry-run
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/install.sh | bash -s -- --dry-run
 ```
+
+> 脚本会自动探测 DSH 安装位置与 web profile;非默认布局可加 `--profile <profile 目录>`、`--port <端口>`。
 
 装完 **刷新一下 DSH Web UI 页面** → 右下角出现悬浮「控制台」。
 
@@ -96,8 +107,8 @@ YAML
 卸载:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/uninstall.sh | bash
-# 或本地:bash uninstall.sh [--purge  # 连输出留档一起删]
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/akvi0921/dsh-console-tap/main/uninstall.sh | bash
+# 或本地:bash uninstall.sh [--purge]   # --purge 连输出留档一起删
 ```
 
 ---
