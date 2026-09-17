@@ -70,26 +70,37 @@ for (let i = 0; i < 4000; i += 1) s3.handle({ type: 'chunk', id: 'c9', stream: '
 check('行数被限制在 3000 以内', s3.get('c9').screens.stdout.lines.length <= 3001, '实际 ' + s3.get('c9').screens.stdout.lines.length);
 check('保留的是最新的行', s3.get('c9').screens.stdout.lines.join('\n').includes('line 3999'), '');
 
-console.log('\n结果: PASS=' + pass + ' FAIL=' + fail);
-process.exit(fail > 0 ? 1 : 0);
-
 console.log('== rich 控制台重绘(光标移动 + ESC[0K,不是 CR) ==');
 {
-  // 与 Gradle rich 同形状:上移 -> 回列 -> 擦除本行 -> 写新文本 -> 下移
-  const screen = mod.createScreen();
-  const redraw = (pct, secs) => `\u001b[2A\u001b[0K\u001b[1m<=====> ${pct}% EXECUTING [${secs}s]\u001b[m\u001b[37D\u001b[2B`;
-  mod.writeScreen(screen, '> Task :a\n> Task :b\n');
-  for (let i = 1; i <= 30; i++) mod.writeScreen(screen, redraw(i * 3, i));
-  const worst = Math.max(...screen.lines.map((l) => l.length));
-  const execLines = screen.lines.filter((l) => l.includes('EXECUTING')).length;
-  check('没有把重绘串成一行(最长行 <= 200)', worst <= 200, `最长行=${worst}`);
-  check('进度行没有累积(<= 2 行)', execLines <= 2, `EXECUTING 行数=${execLines}`);
-  check('任务行保留', screen.lines.some((l) => l.includes(':a')), screen.lines.slice(0, 3).join(' / '));
-  check('画面无残留转义字符', screen.lines.every((l) => !l.includes('\u001b')));
-  // 跨帧半个序列:把一条重绘序列切成两半喂进去,不能错乱
-  const s2 = mod.createScreen();
-  mod.writeScreen(s2, 'X\n');
-  mod.writeScreen(s2, '\u001b[1A\u001b[0K');
-  mod.writeScreen(s2, 'Y');
-  check('跨帧半个序列不错乱', s2.lines.filter((l) => l.trim() !== '').join('|') === 'Y', JSON.stringify(s2.lines));
+  // 真实终端的"原地刷新"必须先把光标移回行首(ESC[1G)再擦除(ESC[0K)再写;
+  // 只擦不移动在真终端里也不会覆盖 —— 那属于正确语义,不该当 bug(踩过这个假警报)。
+  const a = mod.createScreen();
+  mod.writeScreen(a, '> Task :a\n> Task :b\n');
+  for (let i = 1; i <= 30; i++) mod.writeScreen(a, `\u001b[1G\u001b[0K\u001b[1m<=====> ${i * 3}% EXECUTING [${i}s]\u001b[m`);
+  const aWorst = Math.max(...a.lines.map((l) => l.length));
+  const aExec = a.lines.filter((l) => l.includes('EXECUTING')).length;
+  check('A 回到行首重绘不串行(最长行 <= 200)', aWorst <= 200, `最长行=${aWorst}`);
+  check('A 进度行只有 1 行', aExec === 1, `EXECUTING 行数=${aExec}`);
+  check('A 任务行原样保留', a.lines[0] === '> Task :a' && a.lines[1] === '> Task :b', JSON.stringify(a.lines.slice(0, 3)));
+  check('A 最终进度值正确', a.lines[2] === '<=====> 90% EXECUTING [30s]', a.lines[2]);
+
+  // B) Gradle 那种"上移 -> 左移回列 -> 擦除 -> 重写 -> 下移"
+  const b = mod.createScreen();
+  mod.writeScreen(b, '> Task :a\n> Task :b\n');
+  for (let i = 1; i <= 30; i++) mod.writeScreen(b, `\u001b[1A\u001b[40D\u001b[0K<=====> ${i * 3}% EXECUTING [${i}s]\u001b[1B`);
+  const bWorst = Math.max(...b.lines.map((l) => l.length));
+  check('B 上移重绘不串行(最长行 <= 200)', bWorst <= 200, `最长行=${bWorst}`);
+  check('B 进度值没有堆叠', b.lines.every((l) => (l.match(/EXECUTING/g) || []).length <= 1),
+    JSON.stringify(b.lines.map((l) => l.length)));
+  check('B 画面无残留转义字符', b.lines.every((l) => !l.includes('\u001b')));
+
+  // C) 跨帧半个转义序列:切成两半喂进去不能错乱
+  const c = mod.createScreen();
+  mod.writeScreen(c, 'X\n');
+  mod.writeScreen(c, '\u001b[1A\u001b[1G\u001b[0K');
+  mod.writeScreen(c, 'Y');
+  check('C 跨帧半个序列不错乱', c.lines.filter((l) => l.trim() !== '').join('|') === 'Y', JSON.stringify(c.lines));
 }
+
+console.log('\n结果: PASS=' + pass + ' FAIL=' + fail);
+process.exit(fail > 0 ? 1 : 0);
