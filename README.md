@@ -13,7 +13,20 @@
 
 ---
 
-## 一键安装
+## 安装
+
+### 方式 A:官方包安装(推荐,需 pnpm)
+
+本仓库是标准的 DSH **bundle**(`package.json` 声明了 `dsh.bundle.patch`),所以可以走官方包管理:
+
+```bash
+dsh plugin add --profile web github:akvi0921/dsh-console-tap
+```
+
+> 前提:机器上有 `pnpm`(DSH 用 pnpm 管理 profile 插件;没有会提示 `pnpm not found on PATH`)。
+> 装完**重启一次** `dsh web`(官方包安装是把本包加进 profile 的 bundle 列表,启动时按 bundle 补丁插行)。
+
+### 方式 B:一键脚本(不需要 pnpm,装完改一下补丁即生效)
 
 **推荐(自动镜像回退,国内网络最稳)** —— 复制粘贴这一整行:
 
