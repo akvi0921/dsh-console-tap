@@ -166,7 +166,8 @@ DSH 宿主进程
 .
 ├── install.sh              # 一键安装(幂等,含自检)
 ├── uninstall.sh            # 一键卸载
-├── package.json            # 包元数据(含 dsh.client 声明,浏览器半个靠它被发现)
+├── package.json            # 包元数据:dsh.bundle(官方包安装契约) + dsh.client(浏览器半个靠它被发现)
+├── cordis.patch.yml        # bundle 补丁:dsh.bundle.patch 指向它(官方包安装时自动插行)
 ├── lib/host.js             # 宿主半个:采集 + WS 服务端
 ├── lib/client.js           # 浏览器半个:悬浮控制台(手工 bundle,无构建步骤)
 ├── tools/probe.mjs         # WS 帧探针(零依赖)

@@ -142,6 +142,22 @@
 
 ---
 
+## 七点五、发布形态(官方包契约)
+
+仓库按 DSH 官方 bundle 契约发布,可被 `dsh plugin add` 直接安装:
+
+```jsonc
+// package.json
+"dsh": {
+  "bundle": { "patch": "./cordis.patch.yml" },   // 官方包安装的门槛(只有 dsh.client 不算可安装)
+  "client": { "platform": "web", "inject": ["@deepseek-ai/dsh-client-runtime"] }
+}
+```
+
+`cordis.patch.yml`(bundle 补丁)只插**一行**、用**裸包名** —— 与官方 `@deepseek-ai/dsh-base` 的写法一致。
+实测(临时 profile,包真实落在 `<profile>/node_modules/@local/dsh-console-tap-ui`,profile 只保留与本插件无关的一行补丁):
+全新启动 → 首页 200、`/api/console/status` 200、marks 齐全、boot 清单恰好一行 console-tap、WS 收到 `hello`。
+
 ## 八、APP 侧(下一步,尚未实施)
 
 宿主半个与前端**完全解耦**:APP 只要

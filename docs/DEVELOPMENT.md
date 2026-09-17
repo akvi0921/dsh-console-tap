@@ -86,6 +86,16 @@ export const inject = ['webServer', 'subprocess'];
 
 ---
 
+## 3.6 两种安装形态(行名为什么有两种写法)
+
+| 形态 | 组合行 | 何时用 |
+| --- | --- | --- |
+| **官方包安装(bundle)** | `<profile>/package.json` 的 `dsh.profile.bundles` 里加本包名;行由本包的 `cordis.patch.yml`(`dsh.bundle.patch`)插入 → **一行裸包名** `@local/dsh-console-tap-ui` | `dsh plugin add` / 手工把包放进 profile 的 `node_modules`。启动路径,裸包名会被 import ✓ |
+| **一键脚本 / 手工装** | 直接往 `<profile>/cordis.patch.yml` 追加**两条行**:宿主半个用相对文件路径、浏览器半个用裸包名 | 没有 pnpm、或想"改一下补丁就热生效"而不重启 |
+
+两者都已在临时 profile 上实测通过(全新启动:`/api/console/status` 200、boot 清单恰好一行、`hello` 帧到达)。
+区别的根源是 §3.2:**热插入**的行只保证"相对文件路径会被 import",而**启动**路径下裸包名同样会被 import。
+
 ## 4. 帧协议(WS `/api/console`,服务端 → 客户端)
 
 | 帧 | 字段 | 说明 |
