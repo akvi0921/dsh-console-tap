@@ -161,6 +161,13 @@ window.__ModuleLoader__.load({ id, factory: (require) => exports })
 - 纯逻辑(帧 reducer、终端画面、Gradle 状态行解析)与 React 组件分离,**纯逻辑可以在 Node 里直接单测**;
 - 连接失败按指数退避重连,断开时窗口显示"未连接"而不是静默。
 
+**终端画面必须是"光标感知"的**(2.0.2 实测教训):真实 CLI(Gradle rich 等)原地刷新用
+`ESC[3A`(上移)+`ESC[37D`(左移)+`ESC[0K`(擦除本行)+新文本+`ESC[2B`,**不用 `\r`**(实测单次构建 12KB 里一个 `\r` 都没有)。
+只处理 `\r` 会把"重绘"变成"追加"——一行里挤进几十个进度值。本插件的 `lib/client.js` 与 APP 端
+(`ui/ConsoleLogModels.kt` 的 `TerminalBuffer`)现在都是同一套语义:光标行/列 + `ESC[A/B/C/D/E/F/G/H` 移动 +
+`ESC[K` 擦除行(0/1/2)+ `ESC[J` 擦除屏 + SGR/私有模式忽略 + **跨帧缓存半个转义序列**。
+另注意:只 `ESC[0K` 不移动光标**不会**覆盖(那是真终端语义),断言别拿它当 bug。
+
 改前端后的自测:
 
 ```bash
