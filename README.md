@@ -177,6 +177,19 @@ DSH 宿主进程
     └── DESIGN.md           # 设计与实测记录(需求映射 + 5 个硬坑的证据)
 ```
 
+## 生态收录 / 上架状态
+
+本插件按社区各注册表的规则提交(DSH 目前没有官方运营的插件市场,常见的是下面这些社区注册表):
+
+| 注册表 | 提交方式 | 状态 |
+| --- | --- | --- |
+| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | PR 加一个 `data/plugins/<owner>__<repo>.yml` | [PR #5292](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5292) 已提交(1 文件、可合并) |
+| [DSH-Store](https://github.com/AI-Scarlett/DSH-Store) | Issue 表单填仓库地址 → 机器人固定 Commit 做静态预检 → Catalog 策略复核后自动上架 | [Issue #883](https://github.com/AI-Scarlett/DSH-Store/issues/883),预检工作流已 **success** |
+| [WhaleHub 🐋](https://github.com/vvlife/whalehub-dsh) | Issue 表单(或 PR 改 `registry/plugins.json`) | [Issue #81](https://github.com/vvlife/whalehub-dsh/issues/81) 已提交 |
+| [awesome-deepseek-harness-plugins](https://github.com/vvlife/awesome-deepseek-harness-plugins)(WhaleHub 注册表的数据源) | 给仓库打 **`dsh-plugin`** topic 即自动收录(每日快照) | 已打 topic,等待快照 |
+
+> 想收录/引用的仓库:本仓库已声明官方包契约(`dsh.bundle.patch`),并带 `dsh`、`dsh-plugin` 两个 topic 便于生态索引。
+
 ## 环境要求
 
 - DSH(Harness)且使用 **web** profile(`~/.dsh/profiles/web`)
